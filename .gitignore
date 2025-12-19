@@ -1,2 +1,66 @@
+# =====================
+# Python
+# =====================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.pyo
+*.pyd
 
+# Virtual Environments
+venv/
+.env
+.env.*
+env/
+ENV/
+__pypackages__/
 
+# Pip / Package Management
+*.egg
+*.egg-info/
+dist/
+build/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# SQLite / Local Databases
+*.sqlite3
+*.db
+*.db-journal
+
+# Logs
+*.log
+
+# =====================
+# IDEs / Editors
+# =====================
+# VSCode
+.vscode/
+
+# PyCharm / IntelliJ
+.idea/
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# =====================
+# System / OS files
+# =====================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =====================
+# Alembic / Migrations (optional)
+# =====================
+app/db/migrations/versions/*
+
+# =====================
+# Misc / Temp
+# =====================
+*.tmp
+*.swp
+*.bak
