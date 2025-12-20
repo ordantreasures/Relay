@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey,Boolean
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.db.base import Base
@@ -13,6 +13,12 @@ class Post(Base):
     author_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    
+    is_deleted = Column(Boolean, default=False, nullable=False)
+    
+    def soft_delete(self):
+        self.is_deleted = True
 
     author = relationship("User", backref="posts")
     category = relationship("Category", backref="posts")

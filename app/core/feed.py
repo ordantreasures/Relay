@@ -1,28 +1,26 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+import json
 from sqlalchemy import select, func
-from app.db.session import get_db
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.post import Post
 from app.models.engagement import Engagement
 from app.schemas.post import PostRead
 from app.core.cache import get_cached, set_cache
-import json
-
-router = APIRouter()
 
 
-@router.get("/trending/posts")
-async def trending_posts(limit: int = 10, db: AsyncSession = Depends(get_db), use_cache: bool = True):
+async def get_feed_posts(db: AsyncSession, limit: int = 20, offset: int = 0, use_cache: bool = True):
     """
-    Returns top trending posts based on engagement (likes, shares, comments) with caching.
+    Returns posts ranked by a combination of:
+    - Engagement score (likes, shares, comments)
+    - Recency (newer posts favored)
+    Uses Redis caching for performance.
     """
-    cache_key = f"trending:{limit}"
+    cache_key = f"feed:{limit}:{offset}"
 
     # Check cache first
     if use_cache:
         cached = await get_cached(cache_key)
         if cached:
-            return json.loads(cached)
+            return [PostRead.parse_raw(p) for p in json.loads(cached)]
 
     # --- DB Query ---
     engagement_subq = (
@@ -35,16 +33,17 @@ async def trending_posts(limit: int = 10, db: AsyncSession = Depends(get_db), us
     stmt = (
         select(Post, func.coalesce(engagement_subq.c.engagement_count, 0).label("score"))
         .outerjoin(engagement_subq, Post.id == engagement_subq.c.post_id)
-        .order_by(func.coalesce(engagement_subq.c.engagement_count, 0).desc())
+        .order_by(func.coalesce(engagement_subq.c.engagement_count, 0).desc(), Post.created_at.desc())
         .limit(limit)
+        .offset(offset)
     )
 
     result = await db.execute(stmt)
-    posts = result.fetchall()
-    posts_json = [{"post": PostRead.from_orm(p[0]).dict(), "score": p[1]} for p in posts]
+    posts = [p[0] for p in result.fetchall()]
 
     # Cache the result
     if use_cache:
+        posts_json = [PostRead.from_orm(p).json() for p in posts]
         await set_cache(cache_key, json.dumps(posts_json), expire=300)
 
-    return posts_json
+    return posts

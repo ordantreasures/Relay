@@ -4,7 +4,7 @@ import os
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://postgres:password@localhost:5432/relay"
+    "postgresql+asyncpg://postgres:postman@localhost:5432/relay"
 )
 
 engine = create_async_engine(

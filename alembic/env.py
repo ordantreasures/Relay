@@ -10,6 +10,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 # Alembic Config object
 config = context.config
 
+from app.core.config import settings
+
+config.set_main_option(
+    "sqlalchemy.url",
+    settings.DATABASE_URL.replace("+asyncpg", "")
+)
+
+
+
 #  config file for Python logging
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
