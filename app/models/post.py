@@ -1,7 +1,11 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey,Boolean
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Boolean, Index
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.db.base import Base
+
+
+
+
 
 class Post(Base):
     __tablename__ = "posts"
@@ -22,3 +26,12 @@ class Post(Base):
 
     author = relationship("User", backref="posts")
     category = relationship("Category", backref="posts")
+    
+    
+    # app/models/post.py
+
+__table_args__ = (
+    Index("idx_posts_created_at", "created_at"),
+    Index("idx_posts_category", "category_id"),
+    Index("idx_posts_not_deleted", "is_deleted"),
+)
